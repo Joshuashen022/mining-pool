@@ -95,7 +95,7 @@ where
     }
 
     /// Return currently free peer but with highest hash rate
-    pub fn get_peer_high_free(&self) -> Option<&PeersId>{
+    pub fn get_peer_high_free(&self) -> Option<PeersId>{
         if self.peers.len() == self.current_work_distribution.len() {
             return  None
         }
@@ -103,22 +103,28 @@ where
         assert!(self.peers.len() > self.current_work_distribution.len(),
                 "Error! Working peer is more than total peer.");
 
-        self.peers.keys()
+        let res = self.peers.keys()
             .filter(|peer|{
             self.current_work_distribution.keys()
                 .find(|work_peer|work_peer == peer)
                 .is_none()
         }).reduce(|a, b|{
-            if self.current_work_distribution.get(a) > self.current_work_distribution.get(b) {
+            if self.current_work_distribution.get(&a) > self.current_work_distribution.get(&b) {
                 a
             } else {
                 b
             }
-        })
+        });
+
+        if let Some(id) = res{
+            Some(id.clone())
+        } else {
+            None
+        }
     }
 
     /// Return currently less busy peer(not free) but with highest hash rate
-    pub fn get_peer_high_less(&self) -> Option<&PeersId>{
+    pub fn get_peer_high_less(&self) -> Option<PeersId>{
         assert_eq!(self.peers.len(), self.current_work_distribution.len(),
                 "Error! Working peers should be the same as total peers.");
 
@@ -137,7 +143,7 @@ where
         });
 
         if let Some((peer, _)) = res{
-            Some(peer)
+            Some(peer.clone())
         } else{
             None
         }
