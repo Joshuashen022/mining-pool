@@ -46,8 +46,22 @@ where
     PeersId: Default + Eq + Hash + AsRef<[u8]> + Clone,
     Powers: Default + Power + Clone,
     Workloads: Default + Workload + Clone + Ord,
-    Database: AccessDatabase<PeersId, Workloads>,
+    Database: AccessDatabase<PeersId, Workloads, Database = Database>,
 {
+    pub fn new(path: String) -> Self{
+        let peers = HashMap::default();
+        let total_power = Powers::default();
+        let total_workload = Workloads::default();
+        let current_work_distribution = HashMap::default();
+        let distribute_method = DistributeMethod::Default;
+        let finished_work = Database::open(path);
+
+        Self{
+            peers, total_power, total_workload,
+            current_work_distribution, distribute_method, finished_work
+        }
+    }
+
     pub fn peers_total(&self) -> &HashMap<PeersId, Powers> {
         &self.peers
     }
