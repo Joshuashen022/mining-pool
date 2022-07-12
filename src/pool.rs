@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::peer::Peer;
 use crate::power::Power;
 use crate::workload::Workload;
 use crate::database::AccessDatabase;
@@ -33,6 +32,7 @@ where
     /// 3) New work has been sent to the mining pool.
     current_work_distribution: HashMap<PeersId, Workloads>,
 
+    #[allow(dead_code)]
     /// Way to distribute hash power
     distribute_method: DistributeMethod,
 
@@ -89,7 +89,8 @@ where
 
     /// Call this when sign a certain amount of work to a peer
     pub fn when_sign_work_to(&mut self, peer: PeersId, work: Workloads){
-        self.current_work_distribution.insert(peer, work);
+        self.current_work_distribution.insert(peer, work.clone());
+        self.total_workload.add(work);
     }
 
     /// Call this method when peer finish some work.
@@ -98,12 +99,12 @@ where
 
             current_work.sub(finished_work.clone());
             self.current_work_distribution.insert(peer.clone(), current_work);
-
+            self.total_workload.sub(finished_work.clone());
             if let Ok(mut work_data) = self.finished_work.get_value(&peer){
                 work_data.add(finished_work);
 
                 // Overwrite data base
-                self.finished_work.put(&peer, &work_data).unwrap();
+                self.finished_work.put_value(&peer, &work_data).unwrap();
             }
         }
     }

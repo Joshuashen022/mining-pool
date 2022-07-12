@@ -7,6 +7,7 @@ pub enum DistributeMethod{
 
     /// First set peer to different groups (by hash power or other things),
     /// then allocate the group with the same workload
+    #[allow(dead_code)]
     Trunk,
 }
 impl Default for DistributeMethod{

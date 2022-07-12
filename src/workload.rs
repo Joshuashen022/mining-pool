@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::hash::Hash;
 
 pub trait Workload<W = Self>{
     fn add(&mut self, p: W);

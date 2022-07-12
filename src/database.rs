@@ -1,5 +1,4 @@
-use std::path::Path;
-use rocksdb::{DB, Options};
+use rocksdb::DB;
 
 
 pub trait AccessDatabase<Key, Value> {
@@ -9,7 +8,7 @@ pub trait AccessDatabase<Key, Value> {
 
     fn get_value(&mut self, key: &Key) -> Result<Value,()>;
 
-    fn put(&mut self, key: &Key, value: &Value) -> Result<(),()>;
+    fn put_value(&mut self, key: &Key, value: &Value) -> Result<(),()>;
 
     fn delete_key(&mut self, key: &Key) -> Result<Value,()>;
 }
@@ -34,7 +33,7 @@ where
         }
     }
 
-    fn put(&mut self, key: &Key, value: &Value) -> Result<(), ()> {
+    fn put_value(&mut self, key: &Key, value: &Value) -> Result<(), ()> {
         match self.put(key, value){
             Ok(_) => Ok(()),
             Err(e) => Err(println!("{:?}", e)),

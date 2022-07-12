@@ -27,4 +27,7 @@ pub trait Pool
     /// Receive new work, sign it among peers
     /// calling `fn sign_work_to()` according to `distribute_method`
     fn add_new_work(&mut self, work: Self::Workloads, mining_pool: &mut Self::MiningPool);
+
+    /// Receive valid block from peer, add reset peer's status
+    fn finish_job(peer_id: <Self::Peers as Peer>::Id, height: u32, mining_pool: &mut Self::MiningPool);
 }
