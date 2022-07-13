@@ -82,7 +82,7 @@ where
     }
 
     /// Call this when a peer leave the pool
-    pub fn when_peer_leave(&mut self,peer: PeersId){
+    pub fn when_peer_leave(&mut self, peer: PeersId){
 
         let mut peer_power = None;
 
