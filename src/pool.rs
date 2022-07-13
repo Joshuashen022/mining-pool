@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::fmt::Debug;
 
 use crate::power::Power;
 use crate::workload::Workload;
 use crate::database::AccessDatabase;
 use crate::distribute_method::DistributeMethod;
+use log::{info, warn};
 
 #[derive(Default)]
 pub struct MiningPool<PeersId, Powers, Workloads, Database>
@@ -43,9 +45,9 @@ where
 
 impl<PeersId, Powers, Workloads, Database> MiningPool<PeersId, Powers, Workloads, Database>
 where
-    PeersId: Default + Eq + Hash + AsRef<[u8]> + Clone,
-    Powers: Default + Power + Clone,
-    Workloads: Default + Workload + Clone + Ord,
+    PeersId: Default + Eq + Hash + AsRef<[u8]> + Clone + Debug,
+    Powers: Default + Power + Clone + Debug,
+    Workloads: Default + Workload + Clone + Ord + Debug,
     Database: AccessDatabase<PeersId, Workloads, Database = Database>,
 {
     pub fn new(path: String) -> Self{
@@ -72,7 +74,7 @@ where
 
     /// Call this when a peer join the pool
     pub fn when_peer_join(&mut self, peer: PeersId, power: Powers){
-
+        info!("Peer {:?} with hash power {:?} joined the mining pool ", peer, power);
         self.peers.insert(peer, power.clone());
 
         self.total_power.add(power);
@@ -81,10 +83,20 @@ where
 
     /// Call this when a peer leave the pool
     pub fn when_peer_leave(&mut self,peer: PeersId){
+
+        let mut peer_power = None;
+
         if let Some(power)= self.peers.remove(&peer){
-            self.total_power.sub(power);
+            self.total_power.sub(power.clone());
+            peer_power = Some(power);
         };
 
+        if let Some(work)= self.current_work_distribution.remove(&peer){
+            warn!("Peer {:?} left the network with hash power {:?} and unfinished work {:?} ",
+                peer, peer_power, work);
+        } else {
+            info!("Peer {:?} left the network with hash power {:?} ", peer, peer_power);
+        };
     }
 
     /// Call this when sign a certain amount of work to a peer
